@@ -20,7 +20,7 @@ ROLLOUT_BATCH_SIZE=256
 PPO_MINI_BATCH=256
 MAX_PROMPT_LENGTH=2048
 RES_LENGTH=16384
-GROUP_SIZE=16
+GROUP_SIZE=1
 N_VAL_SAMPLES=8
 
 TRAIN_TEMPERATURE=1.0
@@ -55,7 +55,6 @@ SAVE_STATS_DIR=${SAVE_DIR}/stats
 mkdir -p $SAVE_DIR
 mkdir -p $SAVE_STATS_DIR
 
-export RAY_DEBUG=1
 
 python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
@@ -97,7 +96,7 @@ python3 -m verl.trainer.main_ppo \
     trainer.critic_warmup=0 \
     trainer.rejection_sample=True \
     trainer.rejection_sample_multiplier=1 \
-    trainer.logger=['console','wandb'] \
+    trainer.logger=['console'] \
     trainer.project_name=$PROJECT_NAME \
     trainer.experiment_name=$EXP_NAME \
     trainer.val_before_train=False \

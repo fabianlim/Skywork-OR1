@@ -990,86 +990,14 @@ class RayPPOTrainer(object):
                         # compute scores. Support both model and function-based.
                         # We first compute the scores using reward model. Then, we call reward_fn to combine
                         # the results from reward model and rule-based results.
-                        if self.use_rm:
-                            # we first compute reward model score
-                            reward_tensor = self.rm_wg.compute_rm_score(batch)
-                            batch = batch.union(reward_tensor)
+                        # if self.use_rm:
+                        #     # we first compute reward model score
+                        #     reward_tensor = self.rm_wg.compute_rm_score(batch)
+                        #     batch = batch.union(reward_tensor)
 
                         # we combine with rule-based rm
                         reward_tensor = self.reward_fn(batch)
                         batch.batch['token_level_scores'] = reward_tensor
-
-                        # adapt from deepscaler https://github.com/agentica-project/deepscaler/blob/main/verl/verl/trainer/ppo/ray_trainer.py#L627
-                        # if self.config.algorithm.adv_estimator == 'grpo':
-                        #     # Rejection sampling based on rewards
-                        #     # Rejection sampling based on rewards
-                        #     # Group rewards by uid
-                        #     uids = batch.non_tensor_batch['uid']
-                        #     unique_uids = np.unique(uids)
-                        #     valid_mask = torch.ones(len(uids), dtype=torch.bool)
-                        #     solve_none = 0
-                        #     solve_all = 0
-                        #     acc_dist = [0 for i in range(10)]
-                        #     for uid in unique_uids:
-                        #         uid_mask = uids == uid
-                        #         uid_rewards = reward_tensor[uid_mask].sum(-1)  # Sum rewards for each sequence
-                        #         acc = uid_rewards.mean()
-                        #         # Check if all rewards are 0 or all are 1 for this uid
-                        #         if (uid_rewards == 0).all():
-                        #             valid_mask[uid_mask] = False
-                        #             solve_none += 1
-                        #         elif (uid_rewards == 1).all():
-                        #             valid_mask[uid_mask] = False
-                        #             solve_all += 1
-                        #         else:
-                        #             acc_idx = int(acc * 100) // 10
-                        #             acc_dist[acc_idx] += 1
-                        #     
-                        #     # Log to metrics
-                        #     metrics['batch/solve_none'] = solve_none
-                        #     metrics['batch/solve_all'] = solve_all
-                        #     metrics['batch/solve_none_ratio'] = solve_none / len(unique_uids)
-                        #     metrics['batch/solve_all_ratio'] = solve_all / len(unique_uids)
-                        #     metrics['batch/without_adv_ratio'] = (solve_none + solve_all) / len(unique_uids)
-                        #     num_uids = sum(acc_dist) + solve_none + solve_all
-                        #     for i in range(10):
-                        #         lb = "%.2d" % (10 * i)
-                        #         ub = "%.2d" % (10 * (i+1))
-                        #         metrics[f"batch/solve_{lb}%_to_{ub}%"] = acc_dist[i]
-                        #         metrics[f"batch/solve_{lb}%_to_{ub}%_ratio"] = acc_dist[i] / num_uids
-
-                        #     # print(f"solve_none: {solve_none}, solve_all: {solve_all}, num_uids: {num_uids}")
-                        #     print(f"metrics before reject sampling: {metrics}")
-
-
-                        #     if self.config.trainer.rejection_sample:
-                        #         # If no valid samples remain, skip this batch and get a new one
-                        #         if not valid_mask.any():
-                        #             print("No valid samples remain, skip this batch and get a new one")
-                        #             continue
-                        #         
-                        #         #collect metrics before reject sampling
-                        #         _metrics = self.metric_func.compute_metric_wo_advantages(batch_dict=batch_dict, batch = batch.batch)
-                        #         _metrics = dict([k + "_before_rs",v] for k,v in _metrics.items())
-                        #         metrics.update(_metrics)
-                        
-                        #         # Filter batch to keep only valid samples
-                        #         batch = batch[valid_mask]
-                        #         batch = dataprotoitem_to_dataproto(batch)
-                        #         # Round down to the nearest multiple of world size
-                        #         num_trainer_replicas = self.actor_rollout_wg.world_size 
-                        #         max_batch_size = (batch.batch['input_ids'].shape[0] // num_trainer_replicas) * num_trainer_replicas
-                        #         if not max_batch_size:
-                        #             print(f"batch size is too small, give up, with {batch.batch['input_ids'].shape[0]} samples while world size is {num_trainer_replicas}")
-                        #             # give up, you got everything either all wrong or right.
-                        #             continue
-
-                        #         print(f"gen batch size: {gen_batch.batch['input_ids'].shape[0]}, mask_batch size: {batch.batch['input_ids'].shape[0]}, max batch size: {max_batch_size}")
-                        #         size_mask = torch.zeros(batch.batch['input_ids'].shape[0], dtype=torch.bool)
-                        #         size_mask[:max_batch_size] = True
-                        #         batch = batch[size_mask]
-                        #         batch = dataprotoitem_to_dataproto(batch)
-
 
                         # balance the number of valid tokens on each dp rank.
                         # Note that this breaks the order of data inside the batch.
