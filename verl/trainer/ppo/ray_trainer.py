@@ -941,22 +941,6 @@ class RayPPOTrainer(object):
                           config=OmegaConf.to_container(self.config, resolve=True))
 
         self.global_steps = 0
-
-        # load checkpoint before doing anything
-        # self._load_checkpoint()
-
-        # First validation before training
-        if self.val_reward_fn is not None and self.config.trainer.get('val_before_train', True):
-            val_metrics = self._validate_with_temperatures()
-            pprint(f'Initial validation metrics: {val_metrics}')
-            logger.log(data=val_metrics, step=self.global_steps)
-            
-            if self.config.trainer.get('val_only', False):
-                return
-
-        # we start from step 1
-        self.global_steps += 1
-
         for epoch in range(self.config.trainer.total_epochs):
             for batch_dict in self.train_dataloader:
                 metrics = {}
