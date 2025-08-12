@@ -946,7 +946,12 @@ class RayPPOTrainer(object):
                 metrics = {}
                 timing_raw = {}
 
+                # torch.save(batch_dict, f'batch.pt')
+                batch_dict = torch.load('batch.pt')
+
                 batch: DataProto = DataProto.from_single_dict(batch_dict)
+
+                # r = torch.distributed.get_rank()
 
                 # pop those keys for generation
                 gen_batch = batch.pop(batch_keys=['input_ids', 'attention_mask', 'position_ids'])
