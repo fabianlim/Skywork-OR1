@@ -264,11 +264,14 @@ class Worker(Worker):
         if worker_input.num_seq_groups == 0:
             return []
 
-        return self.model_runner.execute_model(
-            model_input,
-            self.kv_cache[worker_input.virtual_engine] if self.kv_cache is not None else None,
-            intermediate_tensors,
-        )
+        try:
+            return self.model_runner.execute_model(
+                model_input,
+                self.kv_cache[worker_input.virtual_engine] if self.kv_cache is not None else None,
+                intermediate_tensors,
+            )
+        except:
+            breakpoint()
 
     # assume the input is .state_dict()
     def sync_model_weights(self, actor_weights: Dict, load_format: str):
