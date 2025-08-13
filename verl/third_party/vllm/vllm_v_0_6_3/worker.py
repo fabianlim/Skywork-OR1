@@ -268,7 +268,8 @@ class Worker(Worker):
 
         if (
             torch.distributed.get_rank() == 0 and
-            ct[0] == 4092
+            ct[0] == 4092 and
+            self.step == 1
         ):
             breakpoint()
 

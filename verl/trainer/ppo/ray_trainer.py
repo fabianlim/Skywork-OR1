@@ -951,16 +951,15 @@ class RayPPOTrainer(object):
 
                 batch: DataProto = DataProto.from_single_dict(batch_dict)
 
-                # r = torch.distributed.get_rank()
-
                 # pop those keys for generation
                 gen_batch = batch.pop(batch_keys=['input_ids', 'attention_mask', 'position_ids'])
                 gen_batch.meta_info = {
                     'do_sample': False,
                     'val_temperature': self.config.actor_rollout_ref.rollout.temperature
                 }
+                self.actor_rollout_wg.inference_engine.llm_engine.model_executor.worker.step = self.global_steps
                 with _timer('step', timing_raw):
-                    # generate a batch
+                    # generate a batchk
                     with _timer('gen', timing_raw):
                         gen_batch_output = self.actor_rollout_wg.generate_sequences(gen_batch)
 
