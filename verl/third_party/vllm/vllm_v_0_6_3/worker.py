@@ -280,7 +280,7 @@ class Worker(Worker):
                 intermediate_tensors,
             )
         except:
-            breakpoint()
+            return []
         # try:
         #     current_pid = os.getpid()
         #     r = torch.distributed.get_rank()

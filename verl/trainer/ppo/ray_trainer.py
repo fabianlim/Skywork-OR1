@@ -957,6 +957,7 @@ class RayPPOTrainer(object):
                     'do_sample': False,
                     'val_temperature': self.config.actor_rollout_ref.rollout.temperature
                 }
+                breakpoint()
                 self.actor_rollout_wg.inference_engine.llm_engine.model_executor.worker.step = self.global_steps
                 with _timer('step', timing_raw):
                     # generate a batchk
