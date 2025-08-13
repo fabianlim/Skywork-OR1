@@ -264,6 +264,14 @@ class Worker(Worker):
         if worker_input.num_seq_groups == 0:
             return []
 
+        ct = model_input.attn_metadata.context_lens_tensor.tolist()
+
+        if (
+            torch.distributed.get_rank() == 0 and
+            ct[0] == 4092
+        ):
+            breakpoint()
+
         try:
             return self.model_runner.execute_model(
                 model_input,
@@ -272,6 +280,19 @@ class Worker(Worker):
             )
         except:
             breakpoint()
+        # try:
+        #     current_pid = os.getpid()
+        #     r = torch.distributed.get_rank()
+        #     print(f"RANK: {r}, PID: {current_pid}")
+        #     kv_cache = self.kv_cache[worker_input.virtual_engine] if self.kv_cache is not None else None,
+        #     torch.save((model_input, kv_cache, intermediate_tensors), f'debug_{r}.pt')
+        #     return self.model_runner.execute_model(
+        #         model_input,
+        #         self.kv_cache[worker_input.virtual_engine] if self.kv_cache is not None else None,
+        #         intermediate_tensors,
+        #     )
+        # except:
+        #     breakpoint()
 
     # assume the input is .state_dict()
     def sync_model_weights(self, actor_weights: Dict, load_format: str):
